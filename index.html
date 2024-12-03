@@ -13,17 +13,26 @@
     <button id="verify-wallet">Verify Wallet</button>
 
     <script>
+        let web3;
+
+        // Initialize Web3 with your Infura API Key
+        const provider = new Web3.providers.HttpProvider('https://mainnet.infura.io/v3/ce0badc3dacf469cbede1c41658bca01');
+        web3 = new Web3(provider);
+
         document.getElementById('verify-wallet').addEventListener('click', async () => {
             const walletAddress = document.getElementById('wallet-address').value.trim();
 
-            // تحقق أن العنوان ليس فارغًا
-            if (!walletAddress) {
-                alert('Please enter a wallet address!');
+            // Validate the wallet address
+            if (!web3.utils.isAddress(walletAddress)) {
+                alert('Please enter a valid Ethereum wallet address!');
                 return;
             }
 
+            // Generate a message to sign
+            const message = `Please sign this message to verify your wallet address: ${walletAddress}`;
+
             try {
-                // إرسال الطلب إلى الخادم للتحقق من المحفظة
+                // Send request to Vercel API
                 const response = await fetch('/api/verify-wallet', {
                     method: 'POST',
                     headers: {
@@ -32,16 +41,16 @@
                     body: JSON.stringify({ walletAddress }),
                 });
 
-                const data = await response.json();
+                const result = await response.json();
 
-                if (response.ok) {
-                    alert(data.message); // نجاح
+                if (result.success) {
+                    alert('Wallet verified successfully!');
                 } else {
-                    alert(data.message); // خطأ
+                    alert(result.message);
                 }
             } catch (error) {
-                console.error('Error verifying wallet:', error);
-                alert('An error occurred while verifying the wallet.');
+                console.error('Error during wallet verification:', error);
+                alert(`An error occurred while verifying the wallet: ${error.message}`);
             }
         });
     </script>
