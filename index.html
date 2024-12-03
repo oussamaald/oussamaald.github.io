@@ -15,13 +15,14 @@
     <script>
         let web3;
 
-        // Initialize Web3 with Infura provider
+        // Initialize Web3 with your Infura API Key
         const provider = new Web3.providers.HttpProvider('https://mainnet.infura.io/v3/ce0badc3dacf469cbede1c41658bca01');
         web3 = new Web3(provider);
 
-        // Event listener for wallet verification
         document.getElementById('verify-wallet').addEventListener('click', async () => {
             const walletAddress = document.getElementById('wallet-address').value.trim();
+
+            // Validate the wallet address
             if (!web3.utils.isAddress(walletAddress)) {
                 alert('Please enter a valid Ethereum wallet address!');
                 return;
@@ -29,10 +30,9 @@
 
             // Generate a message to sign
             const message = `Please sign this message to verify your wallet address: ${walletAddress}`;
-            
+
             try {
-                // In a real scenario, ask the user to sign the message in their wallet app.
-                // This is a simulation assuming we already have a signed message.
+                // Simulate signing the message
                 const signature = await web3.eth.personal.sign(message, walletAddress);
 
                 // Verify the signature
@@ -41,20 +41,12 @@
                 // Check if the recovered address matches the entered address
                 if (verifiedAddress.toLowerCase() === walletAddress.toLowerCase()) {
                     alert('Wallet verified successfully!');
-                    // Optionally, send a POST request to your server (Vercel) to complete the verification
-                    fetch('https://oussamaald-github-io.vercel.app/verify-wallet', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ walletAddress: walletAddress })
-                    });
                 } else {
                     alert('The address could not be verified.');
                 }
             } catch (error) {
-                console.error('Error signing the message:', error);
-                alert('An error occurred while verifying the wallet.');
+                console.error('Error during wallet verification:', error);
+                alert(`An error occurred while verifying the wallet: ${error.message}`);
             }
         });
     </script>
