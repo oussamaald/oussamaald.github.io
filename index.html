@@ -13,40 +13,35 @@
     <button id="verify-wallet">Verify Wallet</button>
 
     <script>
-        let web3;
-
-        // Initialize Web3 with your Infura API Key
-        const provider = new Web3.providers.HttpProvider('https://mainnet.infura.io/v3/ce0badc3dacf469cbede1c41658bca01');
-        web3 = new Web3(provider);
-
         document.getElementById('verify-wallet').addEventListener('click', async () => {
             const walletAddress = document.getElementById('wallet-address').value.trim();
 
-            // Validate the wallet address
-            if (!web3.utils.isAddress(walletAddress)) {
-                alert('Please enter a valid Ethereum wallet address!');
+            // تحقق أن العنوان ليس فارغًا
+            if (!walletAddress) {
+                alert('Please enter a wallet address!');
                 return;
             }
 
-            // Generate a message to sign
-            const message = `Please sign this message to verify your wallet address: ${walletAddress}`;
-
             try {
-                // Simulate signing the message
-                const signature = await web3.eth.personal.sign(message, walletAddress);
+                // إرسال الطلب إلى الخادم للتحقق من المحفظة
+                const response = await fetch('/api/verify-wallet', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ walletAddress }),
+                });
 
-                // Verify the signature
-                const verifiedAddress = web3.eth.accounts.recover(message, signature);
+                const data = await response.json();
 
-                // Check if the recovered address matches the entered address
-                if (verifiedAddress.toLowerCase() === walletAddress.toLowerCase()) {
-                    alert('Wallet verified successfully!');
+                if (response.ok) {
+                    alert(data.message); // نجاح
                 } else {
-                    alert('The address could not be verified.');
+                    alert(data.message); // خطأ
                 }
             } catch (error) {
-                console.error('Error during wallet verification:', error);
-                alert(`An error occurred while verifying the wallet: ${error.message}`);
+                console.error('Error verifying wallet:', error);
+                alert('An error occurred while verifying the wallet.');
             }
         });
     </script>
