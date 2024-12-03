@@ -1,17 +1,15 @@
 
-const connectMetaMask = async () => {
-  if (typeof window.ethereum !== 'undefined') {
-    try {
-      // طلب الاتصال بـ MetaMask
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      console.log('Connected account:', accounts[0]);
-      alert(`Connected: ${accounts[0]}`);
-    } catch (error) {
-      console.error('Error connecting:', error);
-      alert('Failed to connect to MetaMask.');
-    }
-  } else {
-    alert('MetaMask is not installed. Please install MetaMask!');
-  }
-};
- 
+
+const metamaskButton = document.getElementById('metamask-login');
+
+metamaskButton.addEventListener('click', () => {
+    console.log("MetaMask Login Button Clicked");
+
+    // الرابط الذي يفتح تطبيق MetaMask
+    const deepLink = "metamask://dapp/https://oussamaald.github.io/"; // تعديل الرابط ليتوافق مع GitHub Pages
+    window.location.href = deepLink;
+});
+
+if (typeof window.ethereum === "undefined") {
+    alert("MetaMask is not installed. Please install it to continue.");
+}
