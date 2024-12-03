@@ -1,32 +1,30 @@
  
 const express = require('express');
-const Web3 = require('web3');
 const bodyParser = require('body-parser');
+const Web3 = require('web3');
 
 const app = express();
-const web3 = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/v3/YOUR_INFURA_API_KEY'));
 
-// Middleware to parse JSON bodies
+// إعداد Web3 باستخدام Infura
+const web3 = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/v3/ce0badc3dacf469cbede1c41658bca01'));
+
+// Middleware لقراءة الـ JSON في جسم الطلب
 app.use(bodyParser.json());
 
-app.post('/verify-wallet', async (req, res) => {
+// المسار للتحقق من المحفظة
+app.post('/api/verify-wallet', async (req, res) => {
     const { walletAddress } = req.body;
 
+    // تحقق من صحة عنوان المحفظة
     if (!web3.utils.isAddress(walletAddress)) {
-        return res.status(400).json({ success: false, message: 'Invalid address' });
+        return res.status(400).send({ message: 'Invalid Ethereum address.' });
     }
 
-    // Here, we can perform additional verification if needed, like checking if the address has any transactions or balance
-    const balance = await web3.eth.getBalance(walletAddress);
-
-    if (balance === '0') {
-        return res.status(400).json({ success: false, message: 'Address has no balance' });
-    }
-
-    // If everything checks out, return success
-    return res.status(200).json({ success: true, message: 'Wallet verified successfully' });
+    // في حال كانت المحفظة صحيحة، إرسال رد النجاح
+    return res.status(200).send({ message: 'Wallet verified successfully!' });
 });
 
+// تشغيل الخادم على المنفذ 3000
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
