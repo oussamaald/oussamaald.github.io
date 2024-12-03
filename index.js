@@ -1,53 +1,74 @@
-
-const metamaskButton = document.getElementById('metamask-login');
+ 
+// Get the login button and wallet address input field
+const loginButton = document.getElementById('login-btn');
 const walletAddressInput = document.getElementById('wallet-address');
-const submitButton = document.getElementById('submit-wallet');
-const statusDiv = document.getElementById('status');
 
-metamaskButton.addEventListener('click', async () => {
-    if (typeof window.ethereum === 'undefined') {
-        statusDiv.textContent = "MetaMask is not installed. Please install it to continue.";
-        return;
+// Event listener when the login button is clicked
+loginButton.addEventListener('click', async () => {
+  const walletAddress = walletAddressInput.value;
+
+  // Verify if the wallet address is provided
+  if (!walletAddress) {
+    alert('Please enter your wallet address.');
+    return;
+  }
+
+  // Validate the wallet address format (Ethereum)
+  if (!isValidAddress(walletAddress)) {
+    alert('Invalid wallet address. Please check your address.');
+    return;
+  }
+
+  // Verify the wallet address using Infura API
+  try {
+    const response = await verifyWalletAddress(walletAddress);
+
+    // Handle the response
+    if (response.exists) {
+      alert('You have successfully logged in!');
+      // Redirect to the user dashboard or home page
+      window.location.href = 'https://oussamaald.github.io/dashboard'; // Change to your dashboard URL
+    } else {
+      alert('Account not found. Please create a new account.');
+      // Redirect to account creation page
+      window.location.href = 'https://oussamaald.github.io/create-account'; // Change to your create account URL
     }
-    
-    try {
-        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-        const userAddress = accounts[0]; // أول عنوان تم الحصول عليه
-        console.log("User address:", userAddress);
-        
-        // نعرض حقل إدخال المحفظة للمستخدم
-        walletAddressInput.style.display = "block";
-        submitButton.style.display = "block";
-        statusDiv.textContent = "Please enter your wallet address.";
-
-        submitButton.addEventListener('click', () => {
-            const enteredAddress = walletAddressInput.value;
-
-            if (web3.utils.isAddress(enteredAddress)) {
-                statusDiv.textContent = "Address verified! Sending confirmation...";
-                sendTransactionConfirmation(enteredAddress);
-            } else {
-                statusDiv.textContent = "Invalid wallet address. Please try again.";
-            }
-        });
-    } catch (error) {
-        console.error("Error with MetaMask", error);
-    }
+  } catch (error) {
+    console.error('Error verifying wallet address:', error);
+    alert('An error occurred while verifying the address.');
+  }
 });
 
-async function sendTransactionConfirmation(address) {
-    const web3 = new Web3(window.ethereum);
-    try {
-        const tx = await web3.eth.sendTransaction({
-            from: address,
-            to: address,
-            data: "Confirmation for login",
-            value: "0x0"
-        });
-
-        statusDiv.textContent = "Successfully verified! You are now logged in.";
-    } catch (error) {
-        console.error("Error confirming transaction", error);
-        statusDiv.textContent = "There was an error. Please try again.";
-    }
+// Function to validate Ethereum address format
+function isValidAddress(address) {
+  const regex = /^0x[a-fA-F0-9]{40}$/;
+  return regex.test(address);
 }
+
+// Function to verify the wallet address (using Infura or another API)
+async function verifyWalletAddress(walletAddress) {
+  const apiKey = 'ce0badc3dacf469cbede1c41658bca01'; // Infura API Key
+  const url = `https://mainnet.infura.io/v3/${apiKey}`;
+
+  const payload = {
+    jsonrpc: '2.0',
+    method: 'eth_getTransactionCount',
+    params: [walletAddress, 'latest'],
+    id: 1,
+  };
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+
+  if (data.result !== undefined) {
+    return { exists: true }; // Wallet address exists
+  } else {
+    return { exists: false }; // Wallet address does not exist
+  }
