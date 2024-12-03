@@ -1,15 +1,21 @@
-
+ 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login to TRend</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login to TRend</title>
 </head>
 <body>
-    <h1>Welcome to TRendf</h1>
-    <button id="metamask-login">Login with MetaMask</button>
+  <h1>Welcome to TRend</h1>
+  
+  <!-- Input for the user to enter their wallet address -->
+  <label for="wallet-address">Enter your Wallet Address:</label>
+  <input type="text" id="wallet-address" placeholder="0x...">
+  
+  <!-- Button to submit -->
+  <button id="login-btn">Login</button>
 
-    <script src="metamask.js"></script>
+  <script src="index.js"></script>
 </body>
 </html>
