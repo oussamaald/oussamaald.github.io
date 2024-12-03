@@ -19,23 +19,32 @@ loginButton.addEventListener('click', async () => {
     return;
   }
 
-  // Verify the wallet address using Infura API
-  try {
-    const response = await verifyWalletAddress(walletAddress);
+  // Initialize the ethers.js provider (for Metamask)
+  if (typeof window.ethereum !== 'undefined') {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
 
-    // Handle the response
-    if (response.exists) {
-      alert('You have successfully logged in!');
-      // Redirect to the user dashboard or home page
-      window.location.href = 'https://oussamaald.github.io/dashboard'; // Change to your dashboard URL
-    } else {
-      alert('Account not found. Please create a new account.');
-      // Redirect to account creation page
-      window.location.href = 'https://oussamaald.github.io/create-account'; // Change to your create account URL
+    try {
+      // Request user to sign a message (this is where the verification happens)
+      const message = 'Please sign this message to log in.';
+      const signature = await signer.signMessage(message);
+
+      // Verify if the signed message matches the wallet address
+      const recoveredAddress = ethers.utils.verifyMessage(message, signature);
+
+      if (recoveredAddress.toLowerCase() === walletAddress.toLowerCase()) {
+        alert('You have successfully logged in!');
+        // Redirect to the user dashboard or home page
+        window.location.href = 'https://oussamaald.github.io/dashboard'; // Change to your dashboard URL
+      } else {
+        alert('Failed to verify the wallet address.');
+      }
+    } catch (error) {
+      console.error('Error during sign-in process:', error);
+      alert('An error occurred during the sign-in process.');
     }
-  } catch (error) {
-    console.error('Error verifying wallet address:', error);
-    alert('An error occurred while verifying the address.');
+  } else {
+    alert('MetaMask is not installed. Please install MetaMask and try again.');
   }
 });
 
@@ -43,32 +52,3 @@ loginButton.addEventListener('click', async () => {
 function isValidAddress(address) {
   const regex = /^0x[a-fA-F0-9]{40}$/;
   return regex.test(address);
-}
-
-// Function to verify the wallet address (using Infura or another API)
-async function verifyWalletAddress(walletAddress) {
-  const apiKey = 'ce0badc3dacf469cbede1c41658bca01'; // Infura API Key
-  const url = `https://mainnet.infura.io/v3/${apiKey}`;
-
-  const payload = {
-    jsonrpc: '2.0',
-    method: 'eth_getTransactionCount',
-    params: [walletAddress, 'latest'],
-    id: 1,
-  };
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
-
-  const data = await response.json();
-
-  if (data.result !== undefined) {
-    return { exists: true }; // Wallet address exists
-  } else {
-    return { exists: false }; // Wallet address does not exist
-  }
