@@ -2,16 +2,17 @@
 {
   "name": "wallet-verification",
   "version": "1.0.0",
-  "description": "Wallet Address Verification API",
-  "main": "index.js",
+  "description": "Ethereum wallet address verification",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.17.1",
-    "web3": "^1.6.0"
+    "web3": "^1.5.2",
+    "body-parser": "^1.19.0"
   },
   "engines": {
-    "node": "16.x"
+    "node": "14.x"
   }
 }
