@@ -2,21 +2,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login to TRend</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Wallet Address</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
 </head>
 <body>
-  <h1>Welcome to TRend</h1>
-  
-  <!-- Input for the user to enter their wallet address -->
-  <label for="wallet-address">Enter your Wallet Address:</label>
-  <input type="text" id="wallet-address" placeholder="0x...">
-  
-  <!-- Button to submit -->
-  <button id="login-btn">Login</button>
-  
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.4.0/dist/ethers.umd.min.js"></script>
-  <script src="index.js"></script>
+    <h1>Login with Ethereum Wallet</h1>
+    <input type="text" id="wallet-address" placeholder="Enter your wallet address">
+    <button id="verify-btn">Verify Address</button>
+
+    <script>
+        // إنشاء كائن Web3 باستخدام Infura
+        const web3 = new Web3("https://mainnet.infura.io/v3/ce0badc3dacf469cbede1c41658bca01");
+
+        // التحقق من صحة العنوان
+        function isValidAddress(address) {
+            return web3.utils.isAddress(address);
+        }
+
+        // التحقق من ملكية العنوان
+        async function verifyOwnership(address) {
+            try {
+                // نرسل رسالة توقيع للتحقق من ملكية العنوان
+                const message = "I am signing to verify my address ownership";
+                const signature = await web3.eth.personal.sign(message, address, "");
+                console.log("Signature: ", signature);
+
+                // هنا يمكنك إرسال التوقيع للتحقق من ملكية العنوان على الخادم الخاص بك
+                // أو التحقق من توقيع الرسالة بواسطة الخادم
+
+                // إذا كان التوقيع صالحًا، هذا يعني أن العنوان هو ملك المستخدم
+                return true; // يمكنك هنا تغيير هذا للتحقق من التوقيع
+            } catch (error) {
+                console.error("Error during signature verification: ", error);
+                return false;
+            }
+        }
+
+        // التعامل مع الضغط على زر التحقق
+        document.getElementById("verify-btn").addEventListener("click", async () => {
+            const address = document.getElementById("wallet-address").value.trim();
+
+            if (isValidAddress(address)) {
+                console.log("Valid address: ", address);
+                const isOwner = await verifyOwnership(address);
+
+                if (isOwner) {
+                    alert("The address is verified and is owned by the user.");
+                } else {
+                    alert("The address could not be verified.");
+                }
+            } else {
+                alert("Please enter a valid Ethereum address.");
+            }
+        });
+    </script>
 </body>
 </html>
